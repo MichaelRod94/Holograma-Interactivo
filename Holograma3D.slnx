@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Holograma3D.Api/Holograma3D.Api.csproj" />
+    <Project Path="src/Holograma3D.Control/Holograma3D.Control.csproj" />
+    <Project Path="src/Holograma3D.Core/Holograma3D.Core.csproj" />
+    <Project Path="src/Holograma3D.Display/Holograma3D.Display.csproj" />
+    <Project Path="src/Holograma3D.Infrastructure/Holograma3D.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Holograma3D.Tests/Holograma3D.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Holograma3D.Core\Holograma3D.Core.csproj" />
+  </ItemGroup>
+
+</Project>
