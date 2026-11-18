@@ -1,0 +1,31 @@
+@api = http://localhost:5080
+@email = demo@holograma3d.local
+@password = Demo-1234
+
+### Registro
+POST {{api}}/api/auth/register
+Content-Type: application/json
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Login: devuelve accessToken (30 min) y refreshToken (7 días)
+# @name login
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "{{email}}", "password": "{{password}}" }
+
+### Usuario actual
+GET {{api}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Renovar tokens
+# @name refresh
+POST {{api}}/api/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{login.response.body.$.refreshToken}}" }
+
+### Cerrar sesión en todos los dispositivos: ningún refresh token anterior vuelve a servir
+POST {{api}}/api/auth/logout-all
+Authorization: Bearer {{login.response.body.$.accessToken}}
