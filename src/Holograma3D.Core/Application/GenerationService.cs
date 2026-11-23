@@ -1,3 +1,4 @@
+using Holograma3D.Core.Domain;
 using Holograma3D.Core.Domain.Generation;
 using Holograma3D.Core.Domain.Models;
 using Holograma3D.Core.Ports;
@@ -27,7 +28,7 @@ public sealed class GenerationService(IImageTo3DGenerator generator, IGeneration
         {
             if (image.Data.Length > MaxImageBytes)
                 throw new ModelValidationException($"La foto {image.FileName} supera 10 MB.");
-            if (!IsImage(image.Data))
+            if (ImageSignature.ContentType(image.Data) is null)
                 throw new ModelValidationException($"La foto {image.FileName} no es JPEG, PNG ni WEBP.");
         }
         if (await jobs.CountActiveAsync(ownerId, ct) >= settings.MaxActiveJobsPerUser)
@@ -143,17 +144,4 @@ public sealed class GenerationService(IImageTo3DGenerator generator, IGeneration
         return clean.Length > ModelCatalog.MaxNameLength ? clean[..ModelCatalog.MaxNameLength] : clean;
     }
 
-    public static bool IsImage(ReadOnlySpan<byte> data) => ImageType(data) is not null;
-
-    /// <summary>Tipo real por firma de bytes: JPEG (FF D8 FF), PNG (89 50 4E 47) o WEBP ("RIFF"…"WEBP"); null si no es ninguno.</summary>
-    public static string? ImageType(ReadOnlySpan<byte> data)
-    {
-        if (data is [0xFF, 0xD8, 0xFF, ..])
-            return "image/jpeg";
-        if (data is [0x89, 0x50, 0x4E, 0x47, ..])
-            return "image/png";
-        if (data.Length >= 12 && data[..4].SequenceEqual("RIFF"u8) && data[8..12].SequenceEqual("WEBP"u8))
-            return "image/webp";
-        return null;
-    }
 }

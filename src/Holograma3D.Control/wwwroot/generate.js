@@ -1,5 +1,6 @@
 import { authFetch, isLoggedIn } from './auth.js';
 import { el } from './library.js';
+import { shrink } from './images.js';
 
 const LABELS = ['Frente', 'Derecha', 'Atrás', 'Izquierda'];
 const MAX_SIDE = 2048;
@@ -16,20 +17,6 @@ let photos = []; // { blob, url }
 let refreshTimer = 0;
 
 const problemText = problem => [problem?.title, problem?.detail].filter(Boolean).join(': ') || 'No se pudo completar.';
-
-/** Lado mayor ≤ 2048 px, en JPEG calidad 0.9: menos datos y menos créditos de subida. */
-async function shrink(file) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
-  const canvas = Object.assign(document.createElement('canvas'), {
-    width: Math.round(bitmap.width * scale),
-    height: Math.round(bitmap.height * scale),
-  });
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  return new Promise((resolve, reject) =>
-    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('No se pudo convertir la foto.')), 'image/jpeg', 0.9));
-}
 
 function renderPhotos() {
   $('photos-hint').textContent = photos.length < provider.maxImages
@@ -56,7 +43,7 @@ $('photos').addEventListener('change', async () => {
   $('photos').value = '';
   for (const file of files) {
     try {
-      const blob = await shrink(file);
+      const blob = await shrink(file, MAX_SIDE);
       photos.push({ blob, url: URL.createObjectURL(blob) });
     } catch {
       $('form-error').textContent = `No se pudo leer ${file.name}: usa JPG, PNG o WEBP.`;

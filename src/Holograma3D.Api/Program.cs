@@ -27,6 +27,7 @@ builder.Services.AddAuth(builder.Configuration);
 builder.Services.AddModels();
 builder.Services.AddRealtime(builder.Configuration);
 builder.Services.AddGenerations(builder.Configuration);
+builder.Services.AddReconstruction(builder.Configuration, builder.Environment.ContentRootPath);
 
 var app = builder.Build();
 app.Logger.LogInformation("Configuración: {EnvFile}", envFile ?? "sin .env, solo variables de entorno");
@@ -52,6 +53,7 @@ app.MapAuthEndpoints();
 app.MapModelEndpoints();
 app.MapRealtime();
 app.MapGenerationEndpoints();
+app.MapReconstructionEndpoints();
 
 app.Run();
 

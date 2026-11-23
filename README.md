@@ -113,6 +113,15 @@ $env:GenerativeAi__ApiKey = "<tu-clave>"
 
 La clave nunca se escribe en logs ni se devuelve en respuestas, y solo viaja al host de Meshy (o de tu `BaseUrl`); la descarga del modelo terminado va a otro host sin la clave. Cada generación con Meshy consume créditos de tu cuenta.
 
+## Crear desde 5 fotos (sin IA externa)
+
+"Crear desde 5 fotos" (en el Control) arma un STL en el propio servidor, gratis: separa el objeto del fondo en 5 fotos (frontal, izquierda, derecha, trasera y superior), intersecta sus siluetas (volumen visual) y extrae la malla con Surface Nets. Funciona con objetos sin huecos (cajas, botellas, figuras); la base sale plana y las concavidades no se reconstruyen.
+
+Para separar el objeto del fondo hay dos modos; la Api avisa al arrancar cuál usa:
+
+- **Por umbral (por defecto):** no necesita nada más, pero pide fondo liso y contrastante.
+- **U²-Netp:** funciona con fondos menos cuidados. Descarga `u2netp.onnx` (~4.7 MB) de los [releases del proyecto rembg](https://github.com/danielgatis/rembg/releases) o expórtalo desde los pesos oficiales de [U-2-Net](https://github.com/xuebinqin/U-2-Net) (licencia Apache-2.0; revísala antes de usarlo). Cópialo en `src/Holograma3D.Api/models/u2netp.onnx` (en un servidor, en `models/` junto a la Api publicada) o indica otra ruta con `Reconstruction__ModelPath` en `.env`, y reinicia la Api. Los `.onnx` están en `.gitignore`: no se suben al repositorio.
+
 ## Display (proyector)
 
 Abre `http://<IP-LAN>:5082/?s=CODIGO` (lo hace el QR del Control), elige la vista y toca "Iniciar". Sin cuenta: entra con el código de la sesión.

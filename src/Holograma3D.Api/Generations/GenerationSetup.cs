@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Holograma3D.Api.Contracts;
 using Holograma3D.Api.Endpoints;
 using Holograma3D.Core.Application;
+using Holograma3D.Core.Domain;
 using Holograma3D.Core.Domain.Generation;
 using Holograma3D.Core.Domain.Models;
 using Holograma3D.Core.Ports;
@@ -79,7 +80,7 @@ public static class GenerationSetup
                     await file.CopyToAsync(copy, ct);
                     var data = copy.ToArray();
                     // El tipo real sale de los bytes, no de lo que declare el navegador.
-                    images.Add(new GenerationImage(file.FileName, GenerationService.ImageType(data) ?? file.ContentType, data));
+                    images.Add(new GenerationImage(file.FileName, ImageSignature.ContentType(data) ?? file.ContentType, data));
                 }
 
                 try

@@ -163,6 +163,20 @@ progress { width: 100%; margin-top: .5rem; }
 .models a.button { display: inline-block; margin-top: .4rem; }
 code { font-family: ui-monospace, monospace; color: var(--accent); }
 
+/* ---------- Crear desde 5 fotos ---------- */
+.reconstruct { display: grid; gap: 1rem; padding: 1rem; max-width: 72rem; margin: 0 auto; }
+.tips { margin: 0; padding-left: 1.2rem; display: grid; gap: .25rem; }
+.views { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .75rem; }
+.views li { display: flex; flex-direction: column; gap: .4rem; padding: .6rem; border: 1px solid var(--line); border-radius: .5rem; }
+.views h3 { margin: 0; font-size: .95rem; }
+.views svg { width: 5rem; height: 5rem; align-self: center; }
+.views img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #000; border-radius: .3rem; }
+.views input[type="file"] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.views label.button { text-align: center; cursor: pointer; }
+.views li:focus-within label.button { outline: 2px solid var(--accent); outline-offset: 2px; }
+.reconstruct .row label { display: flex; flex-direction: column; gap: .25rem; flex: 1; min-width: 12rem; }
+select { padding: .5rem .6rem; border: 1px solid var(--line); border-radius: .4rem; background: #081013; color: var(--text); font: inherit; }
+
 .cheatsheet { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
 .cheatsheet li { display: grid; grid-template-columns: 4.5rem 1fr; align-items: center; }
 .cheatsheet span { font-size: 1.2rem; white-space: nowrap; }

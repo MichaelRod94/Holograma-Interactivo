@@ -17,7 +17,9 @@ public sealed class ApiFactory(PostgresFixture db, int authPerMinute = 1000, IRe
         builder.UseSetting("ConnectionStrings:Holograma3D", db.ConnectionString);
         builder.UseSetting("RateLimits:AuthPerMinute", authPerMinute.ToString());
         builder.UseSetting("Storage:Root", _storageRoot);
-        builder.UseSetting("GenerativeAi:Provider", ""); // aislado del proveedor real del .env
+        // Aislados del proveedor y la clave reales del .env: ningún test llama a Meshy con tu cuenta.
+        builder.UseSetting("GenerativeAi:Provider", "");
+        builder.UseSetting("GenerativeAi:ApiKey", "");
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
             builder.UseSetting(key, value);
     }

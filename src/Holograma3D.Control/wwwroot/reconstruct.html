@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Holograma3D · Crear desde 5 fotos</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="/config.js"></script>
+  <script type="module" src="reconstruct.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Holograma3D <span class="muted">· Crear desde 5 fotos</span></h1>
+    <a class="button" href="index.html">Volver al Control</a>
+  </header>
+
+  <main class="reconstruct">
+    <section class="card" aria-labelledby="tips-title">
+      <h2 id="tips-title">Cómo tomar las fotos</h2>
+      <ul class="tips">
+        <li>Fondo liso y que contraste con el objeto (por ejemplo, una cartulina blanca para un objeto oscuro).</li>
+        <li>El objeto completo y centrado en cada foto, y quieto entre tomas.</li>
+        <li>Cámara lejos y con zoom, a la misma distancia en todas las tomas.</li>
+        <li>La base no se fotografía: sale plana. Las concavidades (el interior de una taza) no se reconstruyen; para eso usa <a href="generate.html">Crear con IA</a>.</li>
+      </ul>
+      <p class="muted small">Gratis y en tu servidor: las fotos no salen a ningún servicio externo.</p>
+    </section>
+
+    <form id="form" class="card" novalidate aria-labelledby="photos-title">
+      <h2 id="photos-title">Las 5 tomas</h2>
+      <p class="muted small">En los dibujos ves el objeto desde arriba, con su frente abajo; el punto es tu cámara.</p>
+      <ul id="views" class="views"></ul>
+
+      <div class="row">
+        <label for="name">Nombre <input id="name" maxlength="80" placeholder="Por ejemplo: Botella"></label>
+        <label for="resolution">Detalle
+          <select id="resolution">
+            <option value="96">Rápido (96)</option>
+            <option value="128" selected>Normal (128)</option>
+            <option value="160">Fino (160)</option>
+          </select>
+        </label>
+      </div>
+      <p id="status" class="muted" role="status"></p>
+      <p id="form-error" class="form-error" role="alert"></p>
+      <div class="row">
+        <button id="submit" type="submit" class="primary">Generar STL</button>
+        <span id="result" hidden>
+          <a id="project" class="button" href="index.html">Proyectar</a>
+          <a class="button" href="index.html#models-title">Ver en el catálogo</a>
+        </span>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
