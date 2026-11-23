@@ -79,6 +79,19 @@ dotnet test Holograma3D.slnx
 
 `src/Holograma3D.Api/Holograma3D.Api.http` trae las llamadas de registro, login, `/me`, refresh y logout-all para probar a mano desde Visual Studio o VS Code (extensión REST Client).
 
+## Display (proyector)
+
+Abre `http://<IP-LAN>:5082/?s=CODIGO` (lo hace el QR del Control) y toca "Iniciar holograma". Sin cuenta: entra con el código de la sesión.
+
+| Parámetro | Para qué |
+|-----------|----------|
+| `?s=CODIGO` | Código de la sesión; sin él, el Display lo pide |
+| `?demo=1` | Sin Api: gira el modelo por defecto, para probar la pirámide |
+| `?calib=1` | Abre la calibración (también con tres toques rápidos) |
+| `?hud=1` | Muestra la conexión y el gesto en una esquina |
+
+Con el holograma en marcha, un toque largo vuelve a la pantalla inicial. En la calibración, el "Cubo de prueba" ayuda a orientar la pirámide: desde el lado sur debe verse la cara roja de frente y la verde a la derecha. Los valores se guardan en el navegador del móvil.
+
 ## Móvil en la misma red
 
 El móvil entra a la Api (5080) y al Display (5082) por la IP LAN del PC. Si no conecta, abre esos puertos en el firewall de Windows desde una consola de administrador:
