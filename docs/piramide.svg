@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297" font-family="Arial, sans-serif">
+  <title>Holograma3D · plantilla de pirámide para móvil</title>
+  <rect width="210" height="297" fill="#ffffff"/>
+  <text x="20" y="20" font-size="6" fill="#000">Holograma3D · Pirámide para móvil</text>
+  <text x="20" y="28" font-size="3.5" fill="#333">Imprime al 100 % (sin "ajustar a la página"); para tablet, al 200 %. Calca o pega sobre acetato/PET y corta por la línea.</text>
+  <text x="20" y="33" font-size="3.5" fill="#333">Cada trapecio: base menor 10 mm, base mayor 60 mm, altura 35 mm. Une los 4 por los lados con cinta transparente.</text>
+
+  <!-- 4 trapecios: base menor arriba (va contra la pantalla), base mayor abajo -->
+  <g fill="none" stroke="#000" stroke-width="0.3">
+    <polygon points="50,50 60,50 85,85 25,85"/>
+    <polygon points="145,50 155,50 180,85 120,85"/>
+    <polygon points="50,105 60,105 85,140 25,140"/>
+    <polygon points="145,105 155,105 180,140 120,140"/>
+  </g>
+  <g font-size="3" fill="#666" text-anchor="middle">
+    <text x="55" y="80">1</text>
+    <text x="150" y="80">2</text>
+    <text x="55" y="135">3</text>
+    <text x="150" y="135">4</text>
+  </g>
+
+  <!-- Barra para comprobar la escala de impresión -->
+  <g stroke="#000" stroke-width="0.4">
+    <line x1="20" y1="165" x2="70" y2="165"/>
+    <line x1="20" y1="162" x2="20" y2="168"/>
+    <line x1="70" y1="162" x2="70" y2="168"/>
+  </g>
+  <text x="75" y="166.5" font-size="3.5" fill="#000">Esta barra debe medir 50 mm (100 mm si imprimiste para tablet).</text>
+
+  <text x="20" y="185" font-size="3.5" fill="#333">Colócala con la base menor en el centro de la cruz del Display (abre el Display con ?calib=1 para ajustar tamaño y separación).</text>
+  <text x="20" y="191" font-size="3.5" fill="#333">Cuarto oscuro y brillo al máximo: el negro de la pantalla se vuelve transparente y el modelo flota dentro de la pirámide.</text>
+</svg>

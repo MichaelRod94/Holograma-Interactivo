@@ -152,10 +152,17 @@ function applyTransform(t, force = false) {
 
 let demoAngle = 0;
 let previous = performance.now();
+let fpsFrames = 0, fpsSince = previous;
 
 function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
+  fpsFrames++;
+  if (now - fpsSince >= 1000) {
+    $('fps').textContent = `${Math.round(fpsFrames * 1000 / (now - fpsSince))} fps`;
+    fpsFrames = 0;
+    fpsSince = now;
+  }
   if (demo) {
     demoAngle += DEMO_SPEED * dt;
     target.quaternion.setFromAxisAngle(Y_AXIS, demoAngle);

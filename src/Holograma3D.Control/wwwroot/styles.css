@@ -109,8 +109,8 @@ kbd { padding: 0 .3rem; border: 1px solid var(--line); border-radius: .25rem; fo
 }
 .camera-message:empty { display: none; }
 
+.camera .row { align-items: center; }
 .chip {
-  margin-top: .75rem;
   display: inline-block;
   padding: .5rem 1rem;
   border-radius: 999px;

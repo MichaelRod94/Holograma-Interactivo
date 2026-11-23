@@ -1,12 +1,35 @@
 # Holograma3D
 
-Control por gestos de un modelo 3D que se proyecta como holograma de 4 lados (pirámide tipo Pepper's ghost sobre un móvil).
+Control por gestos de un modelo 3D que se proyecta como holograma de 4 lados (pirámide tipo Pepper's ghost sobre un móvil) o en una pantalla plana. Para ensayar una demo completa, sigue [docs/DEMO.md](docs/DEMO.md).
+
+| Control (PC con cámara) | Display: holograma de 4 lados | Display: vista plana |
+|---|---|---|
+| ![Control con la sesión, el QR, la vista previa y el catálogo](docs/img/control.jpg) | ![Cuatro vistas del modelo en cruz sobre negro](docs/img/display-holograma.jpg) | ![Una sola vista del modelo de frente](docs/img/display-plana.jpg) |
 
 | App | Qué hace | URL de desarrollo |
 |-----|----------|-------------------|
 | `Holograma3D.Api` | Núcleo hexagonal, REST y SignalR | http://localhost:5080 |
 | `Holograma3D.Control` | PC con cámara: gestos, modelos y emparejamiento | http://localhost:5081 |
-| `Holograma3D.Display` | Móvil o pantalla: proyección de 4 lados | `http://<IP-LAN>:5082` |
+| `Holograma3D.Display` | Móvil o pantalla: proyección de 4 lados o plana | `http://<IP-LAN>:5082` |
+
+```mermaid
+flowchart LR
+  subgraph PC
+    C["Control :5081<br/>cámara + MediaPipe"]
+    A["Api :5080<br/>REST + SignalR"]
+    DB[("PostgreSQL")]
+  end
+  M["Display :5082<br/>móvil o pantalla"]
+  IA["IA generativa<br/>(Meshy o servidor propio)"]
+  C -- "HandFrames (SignalR, con token)" --> A
+  A -- "transformaciones y modelo" --> M
+  A -- "transformaciones" --> C
+  M -- "QR: entra con el código, sin cuenta" --> A
+  A --- DB
+  A -. "fotos → modelo 3D" .-> IA
+```
+
+Los gestos se interpretan en la Api (Core); el navegador solo envía los 21 puntos de cada mano.
 
 ## Estructura
 
@@ -27,7 +50,22 @@ Toda la configuración sensible va en `.env` o en variables de entorno, nunca en
 Copy-Item .env.example .env
 ```
 
-La Api lee `.env` al arrancar: lo busca en su carpeta de trabajo y hacia arriba (en desarrollo, la raíz del repo; en un servidor, junto a la app publicada). Si una clave existe también como variable de entorno real, gana la variable. Los tests y `dotnet ef` usan el mismo `.env`.
+Las tres apps leen `.env` al arrancar: lo buscan en su carpeta de trabajo y hacia arriba (en desarrollo, la raíz del repo; en un servidor, junto a la app publicada). Si una clave existe también como variable de entorno real, gana la variable. Los tests y `dotnet ef` usan el mismo `.env`.
+
+| Variable | Para qué | Por defecto |
+|----------|----------|-------------|
+| `ConnectionStrings__Holograma3D` | Cadena de PostgreSQL (obligatoria) | — |
+| `GenerativeAi__Provider` | `Meshy`, `Http`, `Fake` o vacío (sin IA) | vacío |
+| `GenerativeAi__ApiKey` | Clave del proveedor de IA (secreto) | — |
+| `GenerativeAi__BaseUrl` | URL de tu servidor de IA (`Http`) u otra URL de Meshy | `https://api.meshy.ai` |
+| `GenerativeAi__Model`, `__OutputFormat`, `__Texture`, `__MaxImages`, `__PollSeconds`, `__TimeoutMinutes`, `__TargetPolycount`, `__MaxActiveJobsPerUser` | Ajustes de la generación (ver `.env.example`) | `latest`, `glb`, `false`, 4, 5, 15, 30000, 3 |
+| `PublicDisplayUrl` | URL del Display que va en el QR | `http://<IP LAN>:5082` |
+| `Control__ApiBaseUrl`, `Display__ApiBaseUrl` | URL de la Api para cada cliente (túnel HTTPS) | mismo host, puerto 5080 |
+| `Cors__Origins__0`, `__1`… | Orígenes permitidos fuera de Development | — |
+| `Auth__AccessTokenMinutes` | Vida del token de acceso | 30 |
+| `RateLimits__AuthPerMinute`, `RateLimits__AnonPerMinute` | Límite por IP de login/registro y de los endpoints anónimos | 10, 60 |
+| `Reconstruction__ModelPath` | Ruta de `u2netp.onnx` | `models/u2netp.onnx` |
+| `Storage__Root` | Carpeta de los archivos de los modelos | `storage` (junto a la Api) |
 
 ## Base de datos (PostgreSQL 18 local)
 
@@ -136,7 +174,7 @@ La vista elegida se guarda en el navegador. Para cambiarla en marcha, toca la pa
 | `?s=CODIGO` | Código de la sesión; sin él, el Display lo pide |
 | `?demo=1` | Sin Api: gira el modelo por defecto, para probar la pirámide |
 | `?calib=1` | Abre la calibración (también con tres toques rápidos) |
-| `?hud=1` | Muestra la conexión y el gesto en una esquina |
+| `?hud=1` | Muestra la conexión, el gesto y los fps en una esquina |
 
 En marcha, un toque largo vuelve a la pantalla inicial. En la calibración, el "Cubo de prueba" ayuda a orientar la pirámide: desde el lado sur debe verse la cara roja de frente y la verde a la derecha. Los valores se guardan en el navegador del móvil.
 
@@ -148,6 +186,32 @@ El móvil entra a la Api (5080) y al Display (5082) por la IP LAN del PC. Si no 
 New-NetFirewallRule -DisplayName "Holograma3D (5080, 5082)" -Direction Inbound -Protocol TCP -LocalPort 5080,5082 -Action Allow -Profile Private
 ```
 
-El QR de cada sesión apunta al Display en la IP LAN que detecta la Api (la imprime al arrancar: "El QR de las sesiones apunta a…"). Si detecta otra interfaz, fija la URL con `PublicDisplayUrl` en `.env`.
+El QR de cada sesión apunta al Display en la IP LAN que detecta la Api (la imprime al arrancar: "El QR de las sesiones apunta a…"). Si detecta otra interfaz, fija la URL con `PublicDisplayUrl` en `.env`. Para HTTPS en el móvil (pantalla encendida y completa fiables), usa un túnel: ver [docs/DEMO.md](docs/DEMO.md#https-para-el-móvil-con-dev-tunnels).
 
-Los valores de calibración de gestos están en la sección `Gestures` de `src/Holograma3D.Api/appsettings.json`; se leen al arrancar la Api.
+Los valores de calibración de gestos están en la sección `Gestures` de `src/Holograma3D.Api/appsettings.json` y se leen al arrancar la Api; cómo ajustarlos, en [docs/DEMO.md](docs/DEMO.md#calibrar-los-gestos).
+
+## Plantilla de la pirámide
+
+Corta 4 trapecios iguales en acetato o PET transparente (una carpeta o la tapa de un empaque sirven) y únelos por los lados con cinta transparente, con la base menor abajo:
+
+| Para | Base menor | Base mayor | Altura |
+|------|-----------|-----------|--------|
+| Móvil | 1 cm | 6 cm | 3.5 cm |
+| Tablet | 2 cm | 12 cm | 7 cm |
+
+[docs/piramide.svg](docs/piramide.svg) trae los 4 trapecios del móvil a escala real: imprímela al 100 % (o al 200 % para tablet) y calca sobre el acetato. Coloca la pirámide con la base menor en el centro de la cruz del Display, en un cuarto oscuro y con el brillo al máximo.
+
+## Solución de problemas
+
+| Síntoma | Causa probable y solución |
+|---------|---------------------------|
+| La Api no arranca: "Falta la cadena de conexión" o error de conexión | PostgreSQL apagado (`Get-Service postgresql-x64-18`, luego `Start-Service postgresql-x64-18`) o `ConnectionStrings__Holograma3D` vacía en `.env`. |
+| La Api no arranca por `GenerativeAi` | La configuración de IA no es válida (por ejemplo, Meshy sin clave); el error dice qué falta. |
+| Los tests de integración fallan al empezar | Igual que arriba: PostgreSQL apagado o sin cadena en `.env` (los tests no usan Docker). |
+| "Permiso de cámara denegado" en el Control | Permite la cámara en el candado de la barra de direcciones; ábrelo en `http://localhost:5081` (no con la IP); cierra Teams/Zoom si la ocupan. |
+| El móvil no abre el Display o no conecta | Firewall (regla de arriba), otra Wi-Fi o IP equivocada en el QR (`PublicDisplayUrl`). |
+| El holograma se ve al revés o en espejo | En la calibración del Display (tres toques): interruptores "Espejo" y "Arriba hacia dentro"; verifica con el cubo de prueba. |
+| La imagen se ve tenue | Brillo del móvil al máximo, cuarto oscuro y pirámide limpia. |
+| "Crear con IA" responde 503 | Proveedor sin configurar: `GenerativeAi__Provider` (y la clave) en `.env`, luego reinicia la Api. |
+| "Crear desde 5 fotos" no detecta el objeto | Fondo más liso y contrastante, o instala `u2netp.onnx` (sección de arriba). |
+| El Display se queda con el modelo anterior | La descarga falló (404): el modelo se borró; proyecta otro desde el Control. |

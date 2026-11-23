@@ -23,9 +23,11 @@ public static class AuthSetup
 
         // Data Protection cifra los tokens con claves guardadas en el perfil del usuario de Windows.
         // ponytail: en contenedores o con varias instancias, PersistKeysToDbContext para que los tokens sobrevivan reinicios.
+        // Auth__AccessTokenMinutes acorta la vida del token para probar la renovación (por defecto 30).
+        var accessTokenMinutes = configuration.GetValue("Auth:AccessTokenMinutes", 30);
         services.Configure<BearerTokenOptions>(IdentityConstants.BearerScheme, o =>
         {
-            o.BearerTokenExpiration = TimeSpan.FromMinutes(30);
+            o.BearerTokenExpiration = TimeSpan.FromMinutes(accessTokenMinutes);
             o.RefreshTokenExpiration = TimeSpan.FromDays(7);
             o.Events.OnMessageReceived = ctx =>
             {

@@ -194,6 +194,44 @@ $('copy-url').addEventListener('click', async () => {
   setTimeout(() => { $('copy-url').textContent = 'Copiar'; }, 1500);
 });
 
+// ---------- Grabador: 30 s de HandFrames en un JSON (tests/Holograma3D.Tests/Recordings y calibración) ----------
+const RECORD_SECONDS = 30;
+let recording = null;
+
+$('record').addEventListener('click', () => {
+  if (recording)
+    return;
+  recording = { frames: [], started: Date.now() };
+  $('record').disabled = true;
+  $('record-status').textContent = '';
+  const timer = setInterval(() => {
+    const left = RECORD_SECONDS - Math.floor((Date.now() - recording.started) / 1000);
+    if (left > 0) {
+      $('record').textContent = `Grabando… ${left} s`;
+      return;
+    }
+    clearInterval(timer);
+    const { frames } = recording;
+    recording = null;
+    $('record').disabled = false;
+    $('record').textContent = `Grabar ${RECORD_SECONDS} s`;
+    if (!frames.length) {
+      $('record-status').textContent = 'No se grabó nada: la cámara no está enviando frames.';
+      return;
+    }
+    // 4 decimales bastan para los landmarks y el archivo queda en una fracción del tamaño.
+    const rounded = frames.map(f => ({ ...f, hands: f.hands.map(h => ({ ...h, lm: h.lm.map(v => Math.round(v * 1e4) / 1e4) })) }));
+    const url = URL.createObjectURL(new Blob([JSON.stringify(rounded)], { type: 'application/json' }));
+    const link = Object.assign(document.createElement('a'), { href: url, download: `grabacion-${new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')}.json` });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    $('record-status').textContent = `Grabación lista: ${frames.length} frames.`;
+  }, 250);
+  $('record').textContent = `Grabando… ${RECORD_SECONDS} s`;
+});
+
 // ---------- Arranque ----------
 async function startApp() {
   const me = await authFetch('/api/auth/me').then(r => r.json());
@@ -222,6 +260,7 @@ async function startApp() {
       meters: $('meters'),
       message: $('camera-message'),
       onFrame: frame => {
+        recording?.frames.push(frame);
         if (connection?.state === signalR.HubConnectionState.Connected && session)
           connection.send('SendHandFrame', frame).catch(() => { });
       },

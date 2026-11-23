@@ -56,7 +56,11 @@
           <div id="meters" class="meters" aria-live="off"></div>
           <div id="camera-message" class="camera-message" role="status"></div>
         </div>
-        <div id="gesture-chip" class="chip" data-state="idle" aria-live="polite">Libre · 0 manos</div>
+        <div class="row">
+          <div id="gesture-chip" class="chip" data-state="idle" aria-live="polite">Libre · 0 manos</div>
+          <button id="record" type="button" title="Guarda en un JSON los frames que se envían a la Api, para tests y calibración">Grabar 30 s</button>
+        </div>
+        <p id="record-status" class="muted small" role="status"></p>
       </section>
 
       <aside class="side">
