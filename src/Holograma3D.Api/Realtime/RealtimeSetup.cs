@@ -14,6 +14,12 @@ using QRCoder;
 
 namespace Holograma3D.Api.Realtime;
 
+/// <summary>URL del Display para una sesión: la del QR y la que el Control muestra para copiar.</summary>
+public sealed record DisplayLink(string BaseUrl)
+{
+    public string For(string code) => $"{BaseUrl}/?s={code}";
+}
+
 public static class RealtimeSetup
 {
     public static IServiceCollection AddRealtime(this IServiceCollection services, IConfiguration configuration)
@@ -24,6 +30,8 @@ public static class RealtimeSetup
         services.AddScoped<SessionService>();
         services.AddSingleton<IHologramBroadcaster, SignalRHologramBroadcaster>();
         services.AddHostedService<SessionCleanup>();
+        services.AddSingleton(sp => new DisplayLink(
+            DisplayUrl(configuration, sp.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(DisplayLink)))));
         services.AddSignalR(o =>
         {
             o.MaximumReceiveMessageSize = 64 * 1024;
@@ -41,8 +49,8 @@ public static class RealtimeSetup
     {
         app.MapHub<HologramHub>("/hubs/hologram");
 
-        var displayUrl = DisplayUrl(app.Configuration, app.Logger);
-        app.Logger.LogInformation("El QR de las sesiones apunta a {DisplayUrl}", displayUrl);
+        var link = app.Services.GetRequiredService<DisplayLink>();
+        app.Logger.LogInformation("El QR de las sesiones apunta a {DisplayUrl}", link.BaseUrl);
         var sessions = app.MapGroup("/api/sessions").RequireRateLimiting("anon");
 
         sessions.MapGet("/{code}/qr.svg", (string code, ISessionStore store) =>
@@ -50,7 +58,7 @@ public static class RealtimeSetup
             if (store.Get(SessionCode.Normalize(code)) is not { } session)
                 return Results.NotFound();
             using var generator = new QRCodeGenerator();
-            using var data = generator.CreateQrCode($"{displayUrl}/?s={session.Code}", QRCodeGenerator.ECCLevel.M);
+            using var data = generator.CreateQrCode(link.For(session.Code), QRCodeGenerator.ECCLevel.M);
             return Results.Text(new SvgQRCode(data).GetGraphic(8), "image/svg+xml");
         });
 

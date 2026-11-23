@@ -13,7 +13,8 @@ public sealed record TransformDto(float Px, float Py, float Pz, float Qx, float 
 
 public sealed record GestureDto(string State, int Hands);
 
-public sealed record SessionSnapshotDto(string Code, ModelDto? Model, TransformDto Transform, GestureDto Gesture, int Displays);
+/// <param name="DisplayUrl">La URL que codifica el QR; el Control la muestra para copiarla.</param>
+public sealed record SessionSnapshotDto(string Code, ModelDto? Model, TransformDto Transform, GestureDto Gesture, int Displays, string DisplayUrl);
 
 public static class RealtimeMapping
 {
@@ -22,8 +23,8 @@ public static class RealtimeMapping
 
     public static GestureDto ToDto(this GestureState state, int hands) => new(state.ToString().ToLowerInvariant(), hands);
 
-    public static SessionSnapshotDto ToDto(this SessionSnapshot s) =>
-        new(s.Code, s.Model?.ToDto(), s.Transform.ToDto(s.Seq, 0), s.Gesture.ToDto(s.HandCount), s.Displays);
+    public static SessionSnapshotDto ToDto(this SessionSnapshot s, string displayUrl) =>
+        new(s.Code, s.Model?.ToDto(), s.Transform.ToDto(s.Seq, 0), s.Gesture.ToDto(s.HandCount), s.Displays, displayUrl);
 
     /// <summary>Valida un frame que llega del navegador; null si no es válido.</summary>
     public static HandFrame? ToDomain(this HandFrameDto? frame, GestureOptions options)

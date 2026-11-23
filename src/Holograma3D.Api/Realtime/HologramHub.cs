@@ -29,7 +29,8 @@ public static class HologramGroups
 /// Sin [Authorize] en la clase: el Display se conecta sin cuenta. Los métodos del Control lo llevan uno por uno.
 /// La sesión de cada conexión vive en Context.Items ("code", "role").
 /// </summary>
-public sealed class HologramHub(SessionService sessions, GestureOptions gestures, ILogger<HologramHub> log) : Hub<IHologramClient>
+public sealed class HologramHub(SessionService sessions, GestureOptions gestures, DisplayLink link, ILogger<HologramHub> log)
+    : Hub<IHologramClient>
 {
     private const string ControlRole = "control", DisplayRole = "display";
     private const int MaxJoinFailures = 10;
@@ -44,7 +45,7 @@ public sealed class HologramHub(SessionService sessions, GestureOptions gestures
     {
         var snapshot = await sessions.CreateAsync(OwnerId, Context.ConnectionId, Context.ConnectionAborted);
         await EnterAsync(snapshot.Code, ControlRole);
-        return snapshot.ToDto();
+        return snapshot.ToDto(link.For(snapshot.Code));
     }
 
     [Authorize]
@@ -52,7 +53,7 @@ public sealed class HologramHub(SessionService sessions, GestureOptions gestures
     {
         var snapshot = await sessions.ResumeAsync(code, OwnerId, Context.ConnectionId, Context.ConnectionAborted);
         await EnterAsync(snapshot.Code, ControlRole);
-        return snapshot.ToDto();
+        return snapshot.ToDto(link.For(snapshot.Code));
     }
 
     public async Task<SessionSnapshotDto> JoinSession(string code)
@@ -72,7 +73,7 @@ public sealed class HologramHub(SessionService sessions, GestureOptions gestures
             throw;
         }
         await EnterAsync(snapshot.Code, DisplayRole);
-        return snapshot.ToDto();
+        return snapshot.ToDto(link.For(snapshot.Code));
     }
 
     [Authorize]

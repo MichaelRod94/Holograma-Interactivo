@@ -77,7 +77,18 @@ Pruebas (los tests de integración usan tu PostgreSQL local con la cadena de use
 dotnet test Holograma3D.slnx
 ```
 
-`src/Holograma3D.Api/Holograma3D.Api.http` trae las llamadas de registro, login, `/me`, refresh y logout-all para probar a mano desde Visual Studio o VS Code (extensión REST Client).
+`src/Holograma3D.Api/Holograma3D.Api.http` trae las llamadas de autenticación y de modelos para probar a mano desde Visual Studio o VS Code (extensión REST Client).
+
+## Control (PC con cámara)
+
+Abre `http://localhost:5081` (la cámara solo funciona en localhost o HTTPS), crea tu cuenta o inicia sesión y permite la cámara. El Control:
+
+- Crea o retoma tu sesión de holograma y muestra su código, el QR y la URL del proyector con botón Copiar.
+- Reconoce las manos con MediaPipe en el navegador y envía los frames a la Api; arriba a la izquierda de la cámara verás fps, ms por inferencia y el RTT hasta el proyector.
+- Administra tus modelos: arrastra un `.stl` o `.glb` (máx. 50 MB), "Proyectar", "Eliminar" o el modelo por defecto.
+- Muestra una vista previa con la misma transformación que el proyector. "Restablecer posición" (o la tecla R) devuelve el modelo al centro.
+
+La sesión de usuario dura lo que la pestaña (sessionStorage); recargar no la cierra. MediaPipe, three.js y SignalR se cargan de CDN: el PC necesita internet.
 
 ## Display (proyector)
 
@@ -104,8 +115,6 @@ El móvil entra a la Api (5080) y al Display (5082) por la IP LAN del PC. Si no 
 ```powershell
 New-NetFirewallRule -DisplayName "Holograma3D (5080, 5082)" -Direction Inbound -Protocol TCP -LocalPort 5080,5082 -Action Allow -Profile Private
 ```
-
-La cámara del Control solo funciona en contexto seguro, así que ábrelo siempre en `http://localhost:5081`.
 
 El QR de cada sesión apunta al Display en la IP LAN que detecta la Api (la imprime al arrancar: "El QR de las sesiones apunta a…"). Si detecta otra interfaz, fija la URL con `PublicDisplayUrl` en `.env`.
 

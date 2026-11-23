@@ -4,10 +4,109 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Holograma3D · Control</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@10.0.11/dist/browser/signalr.min.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/vision_bundle.mjs"
+      }
+    }
+  </script>
+  <script type="module" src="app.js"></script>
 </head>
 <body>
-  <h1>Holograma3D · Control</h1>
-  <p>Marcador de F0. La interfaz llega en F6.</p>
+  <!-- Acceso -->
+  <main id="login" class="login" hidden>
+    <form id="login-form" class="card" novalidate>
+      <h1>Holograma3D</h1>
+      <p id="login-title" class="muted">Inicia sesión para controlar tus hologramas.</p>
+      <label for="email">Correo</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <p id="email-error" class="field-error" role="alert"></p>
+      <label for="password">Contraseña</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <p id="password-hint" class="muted small" hidden>Mínimo 8 caracteres con mayúscula, minúscula, número y símbolo.</p>
+      <p id="password-error" class="field-error" role="alert"></p>
+      <p id="login-error" class="form-error" role="alert"></p>
+      <button id="login-submit" type="submit" class="primary">Entrar</button>
+      <button id="login-toggle" type="button" class="link">Crear cuenta</button>
+    </form>
+  </main>
+
+  <!-- App -->
+  <div id="app" hidden>
+    <header class="topbar">
+      <h1>Holograma3D <span class="muted">· Control</span></h1>
+      <span id="user-email" class="muted"></span>
+      <button id="logout" type="button">Cerrar sesión</button>
+      <button id="logout-all" type="button">Cerrar sesión en todos los dispositivos</button>
+    </header>
+
+    <main class="layout">
+      <section class="camera" aria-label="Cámara">
+        <div class="stage">
+          <video id="video" playsinline muted></video>
+          <canvas id="overlay" aria-hidden="true"></canvas>
+          <div id="meters" class="meters" aria-live="off"></div>
+          <div id="camera-message" class="camera-message" role="status"></div>
+        </div>
+        <div id="gesture-chip" class="chip" data-state="idle" aria-live="polite">Libre · 0 manos</div>
+      </section>
+
+      <aside class="side">
+        <section class="card" aria-labelledby="session-title">
+          <h2 id="session-title">Sesión</h2>
+          <div class="session">
+            <img id="qr" alt="QR para abrir el proyector" width="132" height="132" hidden>
+            <div>
+              <p class="muted small">Código</p>
+              <p id="session-code" class="code">······</p>
+              <p class="small">Proyectores conectados: <strong id="displays">0</strong></p>
+            </div>
+          </div>
+          <div class="url-row">
+            <input id="display-url" readonly aria-label="URL del proyector">
+            <button id="copy-url" type="button">Copiar</button>
+          </div>
+          <div class="row">
+            <button id="reset" type="button">Restablecer posición <kbd>R</kbd></button>
+            <button id="new-session" type="button">Nueva sesión</button>
+          </div>
+          <p id="session-error" class="form-error" role="alert"></p>
+        </section>
+
+        <section class="card" aria-labelledby="preview-title">
+          <h2 id="preview-title">Vista previa</h2>
+          <canvas id="preview" class="preview" aria-label="Vista previa del modelo proyectado"></canvas>
+        </section>
+
+        <section class="card" aria-labelledby="models-title">
+          <h2 id="models-title">Modelos</h2>
+          <label id="dropzone" class="dropzone">
+            <input id="file" type="file" accept=".stl,.glb">
+            <span>Arrastra un .stl o .glb aquí, o <u>elige un archivo</u> (máx. 50 MB)</span>
+          </label>
+          <progress id="upload-progress" max="100" value="0" hidden></progress>
+          <p id="upload-error" class="form-error" role="alert"></p>
+          <button id="default-model" type="button" class="small-button">Proyectar el modelo por defecto</button>
+          <ul id="models" class="models"></ul>
+        </section>
+
+        <section class="card" aria-labelledby="help-title">
+          <h2 id="help-title">Gestos</h2>
+          <ul class="cheatsheet">
+            <li><span aria-hidden="true">✊</span> Puño: agarrar y mover (acerca o aleja la mano para la profundidad)</li>
+            <li><span aria-hidden="true">✋</span> Palma: soltar</li>
+            <li><span aria-hidden="true">✋↔✋</span> Dos palmas separándose o juntándose: zoom</li>
+            <li><span aria-hidden="true">✊✊</span> Dos puños: rotar (desplazar o girar el eje entre las manos)</li>
+          </ul>
+        </section>
+      </aside>
+    </main>
+  </div>
 </body>
 </html>

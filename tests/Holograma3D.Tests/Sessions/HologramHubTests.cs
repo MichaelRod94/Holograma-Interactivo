@@ -58,6 +58,7 @@ public sealed class HologramHubTests(PostgresFixture db) : IDisposable
         var session = await control.InvokeAsync<SessionSnapshotDto>("CreateSession");
         var joined = await display.InvokeAsync<SessionSnapshotDto>("JoinSession", session.Code);
         Assert.Equal(session.Code, joined.Code);
+        Assert.EndsWith($"/?s={session.Code}", session.DisplayUrl);
         Assert.Equal("idle", joined.Gesture.State);
         Assert.Equal(1, await displays.Task.WaitAsync(TimeSpan.FromSeconds(5)));
 
