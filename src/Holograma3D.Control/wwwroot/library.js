@@ -18,6 +18,22 @@ function readableSize(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+/**
+ * Descarga el archivo de un modelo (.stl o .glb) al equipo. El endpoint exige token, así que no basta un enlace:
+ * se baja con authFetch y se guarda desde un blob.
+ */
+export async function downloadModel(model) {
+  const response = await authFetch(model.fileUrl);
+  if (!response.ok)
+    throw new Error(response.status === 404 ? 'El modelo ya no existe.' : `La Api respondió ${response.status}.`);
+  const url = URL.createObjectURL(await response.blob());
+  const link = el('a', { href: url, download: `${model.name}.${model.format}` });
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
 const problemText = problem => [problem?.title, problem?.detail].filter(Boolean).join(': ') || 'No se pudo completar.';
 
 /**
@@ -89,6 +105,12 @@ export class Library {
       active
         ? el('span', { className: 'badge', textContent: 'Proyectando' })
         : el('button', { type: 'button', textContent: 'Proyectar', onclick: () => this.onProject(model.id) }),
+      el('button', {
+        type: 'button',
+        textContent: 'Descargar',
+        ariaLabel: `Descargar ${model.name} (.${model.format})`,
+        onclick: () => downloadModel(model).catch(e => { this.error.textContent = `No se pudo descargar "${model.name}". ${e.message}`; }),
+      }),
       el('button', { type: 'button', className: 'danger', textContent: 'Eliminar', onclick: confirmDelete }),
     );
     // Confirmación dentro de la tarjeta, sin confirm().

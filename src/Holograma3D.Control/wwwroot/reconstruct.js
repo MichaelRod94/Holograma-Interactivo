@@ -1,5 +1,5 @@
 import { apiBaseUrl, getValidToken, isLoggedIn } from './auth.js';
-import { el } from './library.js';
+import { downloadModel, el } from './library.js';
 import { shrink } from './images.js';
 
 const MAX_SIDE = 1600; // la Api las reduce a 1024 px de todos modos
@@ -108,6 +108,7 @@ $('form').addEventListener('submit', async event => {
     const model = xhr.response;
     $('status').textContent = `Listo: "${model.name}" con ${model.triangleCount.toLocaleString('es')} triángulos está en tu catálogo.`;
     $('project').href = `index.html?select=${model.id}`;
+    $('download').onclick = () => downloadModel(model).catch(e => { $('form-error').textContent = `No se pudo descargar: ${e.message}`; });
     $('result').hidden = false;
   };
   xhr.onerror = () => {

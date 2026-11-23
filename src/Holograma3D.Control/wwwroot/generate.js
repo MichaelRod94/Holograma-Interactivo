@@ -1,5 +1,5 @@
 import { authFetch, isLoggedIn } from './auth.js';
-import { el } from './library.js';
+import { downloadModel, el } from './library.js';
 import { shrink } from './images.js';
 
 const LABELS = ['Frente', 'Derecha', 'Atrás', 'Izquierda'];
@@ -96,9 +96,23 @@ function jobItem(job) {
     children.push(el('p', { className: 'form-error', textContent: job.error }));
   if (job.status === 'succeeded')
     children.push(job.modelId
-      ? el('a', { className: 'button', href: `index.html?select=${job.modelId}`, textContent: 'Proyectar' })
+      ? el('div', { className: 'actions' },
+        el('a', { className: 'button', href: `index.html?select=${job.modelId}`, textContent: 'Proyectar' }),
+        el('button', { type: 'button', textContent: 'Descargar', ariaLabel: `Descargar ${job.name}`, onclick: () => download(job) }))
       : el('p', { className: 'muted small', textContent: 'El modelo se eliminó del catálogo.' }));
   return el('li', {}, ...children);
+}
+
+/** El formato y la URL del archivo los da el modelo del catálogo, no la generación. */
+async function download(job) {
+  try {
+    const response = await authFetch(`/api/models/${job.modelId}`);
+    if (!response.ok)
+      throw new Error(response.status === 404 ? 'El modelo ya no existe.' : `La Api respondió ${response.status}.`);
+    await downloadModel(await response.json());
+  } catch (error) {
+    $('form-error').textContent = `No se pudo descargar "${job.name}": ${error.message}`;
+  }
 }
 
 /** Mientras haya trabajos activos, vuelve a consultar cada 3 s; luego se detiene. */

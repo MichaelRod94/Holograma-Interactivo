@@ -160,7 +160,7 @@ progress { width: 100%; margin-top: .5rem; }
 .thumbs li { display: flex; flex-direction: column; gap: .25rem; font-size: .85rem; }
 .thumbs img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: .3rem; }
 .thumbs button { font-size: .8rem; padding: .2rem .4rem; }
-.models a.button { display: inline-block; margin-top: .4rem; }
+.models a.button { display: inline-block; }
 code { font-family: ui-monospace, monospace; color: var(--accent); }
 
 /* ---------- Crear desde 5 fotos ---------- */

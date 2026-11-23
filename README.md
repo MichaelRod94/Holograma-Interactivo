@@ -81,7 +81,7 @@ Abre `http://localhost:5081` (la cámara solo funciona en localhost o HTTPS), cr
 
 - Crea o retoma tu sesión de holograma y muestra su código, el QR y la URL del proyector con botón Copiar.
 - Reconoce las manos con MediaPipe en el navegador y envía los frames a la Api; arriba a la izquierda de la cámara verás fps, ms por inferencia y el RTT hasta el proyector.
-- Administra tus modelos: arrastra un `.stl` o `.glb` (máx. 50 MB), "Proyectar", "Eliminar" o el modelo por defecto.
+- Administra tus modelos: arrastra un `.stl` o `.glb` (máx. 50 MB), "Proyectar", "Descargar", "Eliminar" o el modelo por defecto. Los modelos generados con IA o desde 5 fotos también se descargan desde su propia página.
 - Muestra una vista previa con la misma transformación que el proyector. "Restablecer posición" (o la tecla R) devuelve el modelo al centro.
 
 La sesión de usuario dura lo que la pestaña (sessionStorage); recargar no la cierra. MediaPipe, three.js y SignalR se cargan de CDN: el PC necesita internet.
