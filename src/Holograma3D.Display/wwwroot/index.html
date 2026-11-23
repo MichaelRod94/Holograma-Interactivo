@@ -28,11 +28,17 @@
         <label for="code">Código de la sesión</label>
         <input id="code" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123">
       </div>
+      <div class="modes" role="group" aria-label="Vista">
+        <button type="button" data-mode="hologram">Holograma 4 lados</button>
+        <button type="button" data-mode="flat">Plana</button>
+      </div>
       <p id="message" role="alert"></p>
-      <button type="submit">Iniciar holograma</button>
+      <button type="submit">Iniciar</button>
     </form>
-    <p class="hint">Con el holograma en marcha: toque largo para volver aquí, tres toques para calibrar.</p>
+    <p class="hint">En marcha: un toque muestra el botón para cambiar de vista, toque largo vuelve aquí, tres toques calibran.</p>
   </main>
+
+  <button id="mode-quick" type="button" hidden></button>
 
   <div id="hud" hidden><span id="dot" class="dot"></span><span id="gesture">idle</span></div>
   <section id="calibration" class="panel" hidden aria-label="Calibración"></section>

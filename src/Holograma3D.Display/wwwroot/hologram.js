@@ -10,8 +10,12 @@ const VIEWS = [
   { name: 'oeste', dir: new THREE.Vector3(-1, 0, 0), at: [-1, 0], angle: Math.PI / 2 },
 ];
 const LIGHT_LIFT = new THREE.Vector3(0, 2, 0);
+const FOV = 35;
 
-/** Dibuja la escena desde 4 lados y compone las 4 imágenes en cruz sobre negro. */
+/**
+ * Modo "hologram": dibuja la escena desde 4 lados y compone las 4 imágenes en cruz sobre negro.
+ * Modo "flat": una sola vista de frente a pantalla completa, para proyectar en plano.
+ */
 export class HologramRenderer {
   constructor(canvas, scene, settings) {
     this.scene = scene;
@@ -24,10 +28,11 @@ export class HologramRenderer {
     this.light = new THREE.DirectionalLight(0xffffff, 1.6);
     scene.add(this.light);
 
+    this.flatCamera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
     this.composition = new THREE.Scene();
     this.ortho = new THREE.OrthographicCamera();
     this.views = VIEWS.map(view => {
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
       const target = new THREE.WebGLRenderTarget(1, 1, { samples: 4 });
       // Las esquinas de paneles vecinos se enciman: con mezcla aditiva el negro de uno no tapa al otro.
       const panel = new THREE.Mesh(new THREE.PlaneGeometry(1, 1),
@@ -52,6 +57,15 @@ export class HologramRenderer {
     Object.assign(this.ortho, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2, near: -1, far: 1 });
     this.ortho.updateProjectionMatrix();
 
+    // Plana: en vertical se abre el FOV para que el modelo quepa igual de ancho que de alto.
+    const aspect = w / h;
+    this.flatCamera.aspect = aspect;
+    this.flatCamera.fov = aspect >= 1 ? FOV
+      : THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(FOV / 2)) / aspect));
+    this.flatCamera.position.set(0, 0, distance);
+    this.flatCamera.lookAt(0, 0, 0);
+    this.flatCamera.updateProjectionMatrix();
+
     const g = s * gap;
     const p = Math.min(s * panel, s / 2 - g); // la cruz entra en el cuadrado de lado S
     const r = g + p / 2;
@@ -67,6 +81,12 @@ export class HologramRenderer {
   }
 
   render() {
+    if (this.settings.mode === 'flat') {
+      this.light.position.copy(this.flatCamera.position).add(LIGHT_LIFT);
+      this.renderer.setRenderTarget(null);
+      this.renderer.render(this.scene, this.flatCamera);
+      return;
+    }
     for (const v of this.views) {
       this.light.position.copy(v.camera.position).add(LIGHT_LIFT);
       this.renderer.setRenderTarget(v.target);

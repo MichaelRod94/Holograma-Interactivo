@@ -81,7 +81,12 @@ dotnet test Holograma3D.slnx
 
 ## Display (proyector)
 
-Abre `http://<IP-LAN>:5082/?s=CODIGO` (lo hace el QR del Control) y toca "Iniciar holograma". Sin cuenta: entra con el código de la sesión.
+Abre `http://<IP-LAN>:5082/?s=CODIGO` (lo hace el QR del Control), elige la vista y toca "Iniciar". Sin cuenta: entra con el código de la sesión.
+
+- **Holograma 4 lados**: las 4 vistas en cruz para la pirámide sobre el móvil.
+- **Plana**: una sola vista de frente a pantalla completa, para proyectar en una pared, una TV o un proyector. Responde a los mismos gestos.
+
+La vista elegida se guarda en el navegador. Para cambiarla en marcha, toca la pantalla: aparece unos segundos el botón "Ver plana" / "Ver holograma".
 
 | Parámetro | Para qué |
 |-----------|----------|
@@ -90,7 +95,7 @@ Abre `http://<IP-LAN>:5082/?s=CODIGO` (lo hace el QR del Control) y toca "Inicia
 | `?calib=1` | Abre la calibración (también con tres toques rápidos) |
 | `?hud=1` | Muestra la conexión y el gesto en una esquina |
 
-Con el holograma en marcha, un toque largo vuelve a la pantalla inicial. En la calibración, el "Cubo de prueba" ayuda a orientar la pirámide: desde el lado sur debe verse la cara roja de frente y la verde a la derecha. Los valores se guardan en el navegador del móvil.
+En marcha, un toque largo vuelve a la pantalla inicial. En la calibración, el "Cubo de prueba" ayuda a orientar la pirámide: desde el lado sur debe verse la cara roja de frente y la verde a la derecha. Los valores se guardan en el navegador del móvil.
 
 ## Móvil en la misma red
 

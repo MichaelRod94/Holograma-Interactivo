@@ -254,7 +254,40 @@ $('code-field').hidden = demo;
 function showUi(message = '') {
   $('message').textContent = message;
   $('start').hidden = false;
+  quick.hidden = true;
 }
+
+// ---------- Vista: holograma de 4 lados o plana ----------
+const quick = $('mode-quick');
+const modeButtons = document.querySelectorAll('.modes [data-mode]');
+let quickTimer = 0;
+
+function setMode(mode) {
+  calibration.set('mode', mode); // la guarda en el navegador y reconfigura el render
+  showMode();
+}
+
+function showMode() {
+  const mode = calibration.settings.mode;
+  for (const button of modeButtons)
+    button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
+  quick.textContent = mode === 'flat' ? 'Ver holograma' : 'Ver plana';
+}
+
+/** El botón rápido aparece unos segundos tras un toque: no se queda encima del holograma. */
+function flashQuick() {
+  quick.hidden = false;
+  clearTimeout(quickTimer);
+  quickTimer = setTimeout(() => { quick.hidden = true; }, 3000);
+}
+
+for (const button of modeButtons)
+  button.addEventListener('click', () => setMode(button.dataset.mode));
+quick.addEventListener('click', () => {
+  setMode(calibration.settings.mode === 'flat' ? 'hologram' : 'flat');
+  flashQuick();
+});
+showMode();
 
 $('join').addEventListener('submit', async event => {
   event.preventDefault();
@@ -268,6 +301,7 @@ $('join').addEventListener('submit', async event => {
   keepAwake();
   $('start').hidden = true;
   $('message').textContent = '';
+  flashQuick();
   if (!demo && (newCode !== code || !connection))
     await connect(newCode);
 });
@@ -297,11 +331,12 @@ function notice(text) {
   noticeTimer = setTimeout(() => { $('notice').hidden = true; }, 6000);
 }
 
-// ---------- Toque largo: pantalla inicial · tres toques: calibración ----------
+// ---------- Un toque: botón de vista · toque largo: pantalla inicial · tres toques: calibración ----------
 const canvas = $('view');
 let pressTimer = 0;
 let taps = [];
 canvas.addEventListener('pointerdown', () => {
+  flashQuick();
   pressTimer = setTimeout(() => showUi(), LONG_PRESS_MS);
   const now = performance.now();
   taps = [...taps.filter(t => now - t < TRIPLE_TAP_MS), now];

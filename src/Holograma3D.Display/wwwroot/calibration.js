@@ -2,7 +2,8 @@ import * as THREE from 'three';
 
 const KEY = 'holograma3d.display.calibration';
 
-export const DEFAULTS = Object.freeze({ panel: 0.34, gap: 0.08, distance: 4, resolution: 1024, mirror: true, upInward: false });
+// mode: "hologram" (4 lados para la pirámide) | "flat" (una sola vista, proyección plana).
+export const DEFAULTS = Object.freeze({ mode: 'hologram', panel: 0.34, gap: 0.08, distance: 4, resolution: 1024, mirror: true, upInward: false });
 
 const SLIDERS = [
   ['panel', 'Tamaño del panel', 0.2, 0.45, 0.01],
@@ -82,7 +83,7 @@ export class Calibration {
       this.onTestCube(on);
     });
     this.root.querySelector('#cal-reset').addEventListener('click', () => {
-      this.settings = { ...DEFAULTS };
+      this.settings = { ...DEFAULTS, mode: this.settings.mode }; // restablecer no cambia de vista
       this.changed();
     });
     this.root.querySelector('#cal-close').addEventListener('click', () => this.toggle(false));
