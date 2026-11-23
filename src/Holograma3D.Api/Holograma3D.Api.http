@@ -1,6 +1,9 @@
 @api = http://localhost:5080
 @email = demo@holograma3d.local
 @password = Demo-1234
+# Cambia estas rutas por un .stl y un .glb tuyos (barras normales).
+@stl = C:/ruta/a/modelo.stl
+@glb = C:/ruta/a/modelo.glb
 
 ### Registro
 POST {{api}}/api/auth/register
@@ -25,6 +28,52 @@ POST {{api}}/api/auth/refresh
 Content-Type: application/json
 
 { "refreshToken": "{{login.response.body.$.refreshToken}}" }
+
+### Subir un STL (máx. 50 MB); name es opcional
+# @name stl
+POST {{api}}/api/models
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=holograma
+
+--holograma
+Content-Disposition: form-data; name="name"
+
+Mi modelo STL
+--holograma
+Content-Disposition: form-data; name="file"; filename="modelo.stl"
+Content-Type: application/octet-stream
+
+< {{stl}}
+--holograma--
+
+### Subir un GLB
+# @name glb
+POST {{api}}/api/models
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: multipart/form-data; boundary=holograma
+
+--holograma
+Content-Disposition: form-data; name="file"; filename="modelo.glb"
+Content-Type: application/octet-stream
+
+< {{glb}}
+--holograma--
+
+### Mis modelos (el más reciente primero)
+GET {{api}}/api/models
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Un modelo
+GET {{api}}/api/models/{{stl.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Descargar el archivo
+GET {{api}}/api/models/{{glb.response.body.$.id}}/file
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Borrar
+DELETE {{api}}/api/models/{{stl.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.accessToken}}
 
 ### Cerrar sesión en todos los dispositivos: ningún refresh token anterior vuelve a servir
 POST {{api}}/api/auth/logout-all

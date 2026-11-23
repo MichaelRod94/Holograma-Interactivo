@@ -106,7 +106,7 @@ public sealed class InfrastructureSetupTests
     public void Sin_cadena_de_conexion_falla_con_instrucciones()
     {
         var ex = Assert.Throws<InvalidOperationException>(() =>
-            new ServiceCollection().AddInfrastructure(new ConfigurationBuilder().Build()));
+            new ServiceCollection().AddInfrastructure(new ConfigurationBuilder().Build(), Path.GetTempPath()));
 
         Assert.Contains("user-secrets", ex.Message);
     }

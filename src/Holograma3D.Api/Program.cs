@@ -1,4 +1,5 @@
 using Holograma3D.Api.Auth;
+using Holograma3D.Api.Endpoints;
 using Holograma3D.Infrastructure;
 using Holograma3D.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,9 @@ builder.Services.AddCors(o => o.AddPolicy("web", p =>
 
     p.AllowAnyHeader().AllowAnyMethod().AllowCredentials();
 }));
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.ContentRootPath);
 builder.Services.AddAuth(builder.Configuration);
+builder.Services.AddModels();
 
 var app = builder.Build();
 
@@ -40,6 +42,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/health", () => "ok");
 app.MapAuthEndpoints();
+app.MapModelEndpoints();
 
 app.Run();
 

@@ -45,6 +45,8 @@ Una sola vez. Elige una contraseña para el rol de la app y úsala en los tres p
    dotnet user-secrets set "ConnectionStrings:Holograma3D" "Host=localhost;Port=5432;Database=holograma3d;Username=holograma3d;Password=<tu-contraseña>" --project src/Holograma3D.Api
    ```
 
+Los archivos de los modelos no van en la base: se guardan en `src/Holograma3D.Api/storage/models/` (ignorado por git; cambia la carpeta con `Storage__Root` en `.env`).
+
 La Api aplica las migraciones al arrancar en Development. También puedes aplicarlas a mano:
 
 ```powershell
