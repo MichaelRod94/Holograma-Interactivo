@@ -21,15 +21,17 @@ tests/Holograma3D.Tests         xUnit
 
 ## Configuración personal
 
-Copia `.env.example` a `.env` y complétalo. `.env` está en `.gitignore`: ahí van tu cadena de conexión y tus claves, nunca en `appsettings*.json`.
+Toda la configuración sensible va en `.env` o en variables de entorno, nunca en `appsettings*.json` ni en git (`.env` está en `.gitignore`). No se usa user-secrets: así funciona igual en tu PC que en un servidor.
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
+La Api lee `.env` al arrancar: lo busca en su carpeta de trabajo y hacia arriba (en desarrollo, la raíz del repo; en un servidor, junto a la app publicada). Si una clave existe también como variable de entorno real, gana la variable. Los tests y `dotnet ef` usan el mismo `.env`.
+
 ## Base de datos (PostgreSQL 18 local)
 
-Una sola vez. Elige una contraseña para el rol de la app y úsala en los tres pasos; psql te pide la del superusuario `postgres`.
+Una sola vez. Elige una contraseña para el rol de la app y úsala en los dos pasos; psql te pide la del superusuario `postgres`.
 
 1. Crea el rol:
 
@@ -38,12 +40,6 @@ Una sola vez. Elige una contraseña para el rol de la app y úsala en los tres p
    ```
 
 2. En `.env`, completa `ConnectionStrings__Holograma3D=Host=localhost;Port=5432;Database=holograma3d;Username=holograma3d;Password=<tu-contraseña>`.
-
-3. Guarda la misma cadena en user-secrets del Api, para que `dotnet ef` la encuentre:
-
-   ```powershell
-   dotnet user-secrets set "ConnectionStrings:Holograma3D" "Host=localhost;Port=5432;Database=holograma3d;Username=holograma3d;Password=<tu-contraseña>" --project src/Holograma3D.Api
-   ```
 
 Los archivos de los modelos no van en la base: se guardan en `src/Holograma3D.Api/storage/models/` (ignorado por git; cambia la carpeta con `Storage__Root` en `.env`).
 
@@ -65,13 +61,13 @@ dotnet ef migrations add <Nombre> --project src/Holograma3D.Infrastructure --sta
 powershell -ExecutionPolicy Bypass -File .\run.ps1
 ```
 
-`run.ps1` carga `.env`, muestra la URL del Display para el móvil y abre una ventana por app. También puedes arrancar una sola:
+`run.ps1` muestra la URL del Display para el móvil y abre una ventana por app. También puedes arrancar una sola (la Api lee el `.env` por su cuenta):
 
 ```powershell
 dotnet run --project src/Holograma3D.Api
 ```
 
-Pruebas (los tests de integración usan tu PostgreSQL local con la cadena de user-secrets: cada corrida crea una base `holograma3d_test_*` y la borra al terminar):
+Pruebas (los tests de integración usan tu PostgreSQL local con la cadena del `.env`: cada corrida crea una base `holograma3d_test_*` y la borra al terminar):
 
 ```powershell
 dotnet test Holograma3D.slnx
@@ -89,6 +85,33 @@ Abre `http://localhost:5081` (la cámara solo funciona en localhost o HTTPS), cr
 - Muestra una vista previa con la misma transformación que el proyector. "Restablecer posición" (o la tecla R) devuelve el modelo al centro.
 
 La sesión de usuario dura lo que la pestaña (sessionStorage); recargar no la cierra. MediaPipe, three.js y SignalR se cargan de CDN: el PC necesita internet.
+
+## Configurar tu proveedor de IA
+
+"Crear con IA" (en el Control) genera un modelo a partir de 1 a 4 fotos de un objeto. Cada persona elige su proveedor con variables de entorno; sin configurar, la página explica qué falta.
+
+| Proveedor | Para qué | Variables mínimas |
+|-----------|----------|-------------------|
+| `Fake` | Probar el flujo sin red ni créditos: devuelve un octaedro | `GenerativeAi__Provider=Fake` |
+| `Meshy` | [Meshy](https://www.meshy.ai) Multi-Image to 3D con tu cuenta | `GenerativeAi__Provider=Meshy`, `GenerativeAi__ApiKey` |
+| `Http` | Tu propio servidor (TripoSR, Hunyuan3D-2…) con el [contrato documentado](docs/generative-http-contract.md) | `GenerativeAi__Provider=Http`, `GenerativeAi__BaseUrl` |
+
+El resto (`Model`, `OutputFormat`, `MaxImages`, `PollSeconds`, `TimeoutMinutes`, `TargetPolycount`, `MaxActiveJobsPerUser`) está explicado en `.env.example`. Si la configuración no es válida (por ejemplo, Meshy sin clave), la Api no arranca y dice qué corregir.
+
+En `.env`:
+
+```
+GenerativeAi__Provider=Meshy
+GenerativeAi__ApiKey=<tu-clave>
+```
+
+En un servidor puedes definir las mismas claves como variables de entorno (systemd, Docker, IIS…); tienen prioridad sobre el `.env`. Para probar solo en la consola actual:
+
+```powershell
+$env:GenerativeAi__ApiKey = "<tu-clave>"
+```
+
+La clave nunca se escribe en logs ni se devuelve en respuestas, y solo viaja al host de Meshy (o de tu `BaseUrl`); la descarga del modelo terminado va a otro host sin la clave. Cada generación con Meshy consume créditos de tu cuenta.
 
 ## Display (proyector)
 

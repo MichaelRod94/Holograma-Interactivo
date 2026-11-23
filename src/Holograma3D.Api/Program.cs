@@ -1,10 +1,13 @@
 using Holograma3D.Api.Auth;
 using Holograma3D.Api.Endpoints;
+using Holograma3D.Api.Generations;
 using Holograma3D.Api.Realtime;
 using Holograma3D.Infrastructure;
 using Holograma3D.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
+// La configuración viene del .env o de variables de entorno reales (que mandan); nada de user-secrets.
+var envFile = DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
@@ -23,8 +26,10 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.Co
 builder.Services.AddAuth(builder.Configuration);
 builder.Services.AddModels();
 builder.Services.AddRealtime(builder.Configuration);
+builder.Services.AddGenerations(builder.Configuration);
 
 var app = builder.Build();
+app.Logger.LogInformation("Configuración: {EnvFile}", envFile ?? "sin .env, solo variables de entorno");
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -46,6 +51,7 @@ app.MapGet("/health", () => "ok");
 app.MapAuthEndpoints();
 app.MapModelEndpoints();
 app.MapRealtime();
+app.MapGenerationEndpoints();
 
 app.Run();
 

@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Configuration;
+using Holograma3D.Infrastructure;
 using Npgsql;
 
 namespace Holograma3D.Tests.Infrastructure;
 
 /// <summary>
 /// Una base "holograma3d_test_*" en tu PostgreSQL local para toda la corrida, con la cadena de la Api
-/// (user-secrets o variable de entorno). Los tests no chocan porque cada uno usa usuarios nuevos.
+/// (variable de entorno o .env). Los tests no chocan porque cada uno usa usuarios nuevos.
 /// </summary>
 public sealed class PostgresFixture : IAsyncLifetime
 {
@@ -16,13 +16,12 @@ public sealed class PostgresFixture : IAsyncLifetime
 
     public Task InitializeAsync()
     {
-        var configuration = new ConfigurationBuilder()
-            .AddUserSecrets(typeof(Program).Assembly, optional: true)
-            .AddEnvironmentVariables()
-            .Build();
-        var local = configuration.GetConnectionString("Holograma3D")
+        // Se lee el .env sin cargarlo al entorno del proceso: así no se cuela su proveedor de IA en los tests.
+        const string key = "ConnectionStrings__Holograma3D";
+        var local = Environment.GetEnvironmentVariable(key)
+            ?? (DotEnv.Find() is { } path ? DotEnv.Read(path).GetValueOrDefault(key) : null)
             ?? throw new InvalidOperationException(
-                "Los tests de integración usan tu PostgreSQL local: guarda la cadena con dotnet user-secrets (ver README).");
+                $"Los tests de integración usan tu PostgreSQL local: pon {key} en el .env de la raíz del repo (ver README).");
         // EF la crea al migrar (el rol necesita CREATEDB).
         ConnectionString = new NpgsqlConnectionStringBuilder(local) { Database = Prefix + Guid.NewGuid().ToString("N") }.ConnectionString;
         return Task.CompletedTask;

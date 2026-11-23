@@ -4,7 +4,7 @@ const MAX_BYTES = 50 * 1024 * 1024;
 const SOURCES = { upload: 'Subido', generated: 'Generado', reconstruction: 'Reconstruido' };
 
 /** Crea un elemento; los textos van como textContent (los nombres de modelo los escribe el usuario). */
-function el(tag, props = {}, ...children) {
+export function el(tag, props = {}, ...children) {
   const node = Object.assign(document.createElement(tag), props);
   node.append(...children);
   return node;

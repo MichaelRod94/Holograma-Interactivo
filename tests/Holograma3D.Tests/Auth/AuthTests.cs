@@ -108,6 +108,34 @@ public sealed class InfrastructureSetupTests
         var ex = Assert.Throws<InvalidOperationException>(() =>
             new ServiceCollection().AddInfrastructure(new ConfigurationBuilder().Build(), Path.GetTempPath()));
 
-        Assert.Contains("user-secrets", ex.Message);
+        Assert.Contains(".env", ex.Message);
+    }
+
+    [Fact]
+    public void El_env_se_busca_hacia_arriba_y_no_pisa_variables_reales()
+    {
+        var root = Directory.CreateTempSubdirectory("holograma3d-dotenv-");
+        try
+        {
+            var nested = Directory.CreateDirectory(Path.Combine(root.FullName, "bin", "Debug"));
+            var a = $"H3D_TEST_{Guid.NewGuid():N}";
+            var b = $"H3D_TEST_{Guid.NewGuid():N}";
+            File.WriteAllLines(Path.Combine(root.FullName, ".env"),
+                ["# comentario", "", $"{a}=del-archivo", $"{b}=del-archivo", "SIN_VALOR=", "sin igual"]);
+            Environment.SetEnvironmentVariable(b, "real");
+
+            var path = DotEnv.Load(nested.FullName);
+
+            Assert.Equal(Path.Combine(root.FullName, ".env"), path);
+            Assert.Equal("del-archivo", Environment.GetEnvironmentVariable(a));
+            Assert.Equal("real", Environment.GetEnvironmentVariable(b)); // la variable real manda
+            Assert.Equal(new[] { a, b }.Order(), DotEnv.Read(path!).Keys.Order());
+            Environment.SetEnvironmentVariable(a, null);
+            Environment.SetEnvironmentVariable(b, null);
+        }
+        finally
+        {
+            root.Delete(recursive: true);
+        }
     }
 }

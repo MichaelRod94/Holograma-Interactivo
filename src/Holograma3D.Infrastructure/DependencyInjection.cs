@@ -16,8 +16,8 @@ public static class DependencyInjection
         if (string.IsNullOrWhiteSpace(connectionString))
             throw new InvalidOperationException(
                 "Falta la cadena de conexión 'ConnectionStrings:Holograma3D'. " +
-                "Ponla en .env como ConnectionStrings__Holograma3D (run.ps1 la carga) o en user-secrets: " +
-                "dotnet user-secrets set \"ConnectionStrings:Holograma3D\" \"<cadena>\" --project src/Holograma3D.Api");
+                "Ponla en el archivo .env como ConnectionStrings__Holograma3D=<cadena> (la Api lo lee al arrancar) " +
+                "o como variable de entorno del servidor.");
 
         services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
 
@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IModelStore>(sp => new EfModelStore(
             sp.GetRequiredService<AppDbContext>(), modelsDir, sp.GetRequiredService<ILogger<EfModelStore>>()));
         services.AddSingleton<ISessionStore, InMemorySessionStore>();
+        services.AddScoped<IGenerationJobStore, EfGenerationJobStore>();
         return services;
     }
 }

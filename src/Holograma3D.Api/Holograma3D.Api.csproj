@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <UserSecretsId>17c07c8a-fc42-4bd0-b588-61c5d0b60a48</UserSecretsId>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Holograma3D.Core\Holograma3D.Core.csproj" />
     <ProjectReference Include="..\Holograma3D.Infrastructure\Holograma3D.Infrastructure.csproj" />

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Holograma3D · Crear con IA</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="/config.js"></script>
+  <script type="module" src="generate.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Holograma3D <span class="muted">· Crear con IA</span></h1>
+    <a class="button" href="index.html">Volver al Control</a>
+  </header>
+
+  <main class="generate">
+    <section class="card" aria-labelledby="new-title">
+      <h2 id="new-title">Nuevo modelo desde fotos</h2>
+
+      <div id="disabled" hidden>
+        <p>La generación con IA no está configurada en la Api.</p>
+        <p class="muted small">En tu <code>.env</code> define <code>GenerativeAi__Provider</code> (Meshy, Http o Fake) y, para Meshy,
+          <code>GenerativeAi__ApiKey</code>. Luego reinicia la Api. Con <code>Fake</code> puedes probar el flujo sin gastar créditos.</p>
+      </div>
+
+      <form id="form" hidden novalidate>
+        <p id="notice" class="notice"></p>
+        <label class="dropzone" for="photos">
+          <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+          <span id="photos-hint"></span>
+        </label>
+        <ul id="thumbs" class="thumbs"></ul>
+        <label for="name">Nombre</label>
+        <input id="name" maxlength="80" placeholder="Por ejemplo: Taza">
+        <p id="form-error" class="form-error" role="alert"></p>
+        <button id="submit" type="submit" class="primary">Generar con IA</button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="list-title">
+      <h2 id="list-title">Mis generaciones</h2>
+      <ul id="jobs" class="models" aria-live="polite"></ul>
+    </section>
+  </main>
+</body>
+</html>
