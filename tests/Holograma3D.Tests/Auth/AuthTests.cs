@@ -99,7 +99,7 @@ public sealed class AuthTests(PostgresFixture db) : IDisposable
     }
 }
 
-// Fuera de la colección "db": no necesita Docker.
+// Fuera de la colección "db": no necesita la base.
 public sealed class InfrastructureSetupTests
 {
     [Fact]

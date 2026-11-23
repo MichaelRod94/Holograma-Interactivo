@@ -52,17 +52,19 @@ public static class ModelEndpoints
         models.MapGet("/{id:guid}/file", async (Guid id, ClaimsPrincipal user, ModelCatalog catalog, CancellationToken ct) =>
         {
             var file = await catalog.OpenFileAsync(id, OwnerId(user), ct);
-            if (file is null)
-                return Results.NotFound();
-            var (model, content) = file.Value;
-            var (contentType, extension) = model.Format == ModelFormat.Stl ? ("model/stl", ".stl") : ("model/gltf-binary", ".glb");
-            return Results.File(content, contentType, model.Name + extension, enableRangeProcessing: true);
+            return file is { } f ? FileResult(f.Model, f.Content) : Results.NotFound();
         });
 
         models.MapDelete("/{id:guid}", async (Guid id, ClaimsPrincipal user, ModelCatalog catalog, CancellationToken ct) =>
             await catalog.DeleteAsync(id, OwnerId(user), ct) ? Results.NoContent() : Results.NotFound());
 
         return app;
+    }
+
+    public static IResult FileResult(Model3D model, Stream content)
+    {
+        var (contentType, extension) = model.Format == ModelFormat.Stl ? ("model/stl", ".stl") : ("model/gltf-binary", ".glb");
+        return Results.File(content, contentType, model.Name + extension, enableRangeProcessing: true);
     }
 
     /// <summary>El dueño sale siempre del token, nunca de lo que mande el cliente.</summary>

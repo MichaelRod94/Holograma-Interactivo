@@ -71,7 +71,7 @@ powershell -ExecutionPolicy Bypass -File .\run.ps1
 dotnet run --project src/Holograma3D.Api
 ```
 
-Pruebas (los tests de integración levantan un PostgreSQL 18 en Docker con Testcontainers, así que Docker Desktop debe estar encendido):
+Pruebas (los tests de integración usan tu PostgreSQL local con la cadena de user-secrets: cada corrida crea una base `holograma3d_test_*` y la borra al terminar):
 
 ```powershell
 dotnet test Holograma3D.slnx
@@ -88,3 +88,7 @@ New-NetFirewallRule -DisplayName "Holograma3D (5080, 5082)" -Direction Inbound -
 ```
 
 La cámara del Control solo funciona en contexto seguro, así que ábrelo siempre en `http://localhost:5081`.
+
+El QR de cada sesión apunta al Display en la IP LAN que detecta la Api (la imprime al arrancar: "El QR de las sesiones apunta a…"). Si detecta otra interfaz, fija la URL con `PublicDisplayUrl` en `.env`.
+
+Los valores de calibración de gestos están en la sección `Gestures` de `src/Holograma3D.Api/appsettings.json`; se leen al arrancar la Api.

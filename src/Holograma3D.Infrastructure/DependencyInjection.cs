@@ -25,6 +25,7 @@ public static class DependencyInjection
         var modelsDir = Path.Combine(storageRoot, "models");
         services.AddScoped<IModelStore>(sp => new EfModelStore(
             sp.GetRequiredService<AppDbContext>(), modelsDir, sp.GetRequiredService<ILogger<EfModelStore>>()));
+        services.AddSingleton<ISessionStore, InMemorySessionStore>();
         return services;
     }
 }
