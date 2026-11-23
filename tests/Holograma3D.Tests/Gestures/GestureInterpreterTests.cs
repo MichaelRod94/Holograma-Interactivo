@@ -119,6 +119,70 @@ public class GestureInterpreterTests
     }
 
     [Fact]
+    public void Rotate_con_una_mano_gira_al_moverla()
+    {
+        Feed(3, Sign(0.5f));
+        Assert.Equal(GestureState.Rotate, _sut.State);
+
+        Feed(1, Sign(0.6f));
+
+        Assert.True(Vector3.Transform(Vector3.UnitZ, _sut.Transform.Rotation).X > 0);
+    }
+
+    [Fact]
+    public void Rotate_con_una_mano_inclina_al_girar_la_muneca()
+    {
+        Feed(3, Sign(0.5f));
+
+        Feed(1, Sign(0.5f, tiltDegrees: 30)); // muñeca girada 30° en sentido horario
+
+        var right = Vector3.Transform(Vector3.UnitX, _sut.Transform.Rotation);
+        Assert.Equal(-MathF.Sin(MathF.PI / 6), right.Y, 3);                            // inclinado 30° a la derecha
+        Assert.Equal(0f, Vector3.Transform(Vector3.UnitZ, _sut.Transform.Rotation).X, 4); // sin yaw
+    }
+
+    [Fact]
+    public void Pasar_de_una_mano_a_dos_punos_sigue_rotando_sin_saltar()
+    {
+        Feed(3, Sign(0.5f));
+        Feed(1, Sign(0.6f));
+        var rotated = _sut.Transform.Rotation;
+
+        Feed(1, Fist(0.4f), Fist(0.6f));
+
+        Assert.Equal(GestureState.Rotate, _sut.State);
+        Assert.Equal(rotated, _sut.Transform.Rotation);
+
+        Feed(1, Fist(0.5f), Fist(0.7f));
+        Assert.NotEqual(rotated, _sut.Transform.Rotation);
+    }
+
+    [Fact]
+    public void Con_filtro_girar_la_muneca_cruzando_180_grados_no_da_media_vuelta()
+    {
+        var sut = new GestureInterpreter(new GestureOptions());
+        var t = 0d;
+        // Mano apuntando a la izquierda: su ángulo pasa de −175° a +175° al girar 10° en sentido antihorario.
+        for (var i = 0; i < 3; i++) sut.Apply(new HandFrame(t += 33, [Sign(0.5f, tiltDegrees: -85)]));
+        float RollDegrees()
+        {
+            var right = Vector3.Transform(Vector3.UnitX, sut.Transform.Rotation);
+            return MathF.Atan2(right.Y, right.X) * 180 / MathF.PI;
+        }
+
+        var maxRoll = 0f;
+        for (var i = 0; i < 40; i++)
+        {
+            sut.Apply(new HandFrame(t += 33, [Sign(0.5f, tiltDegrees: -95)]));
+            maxRoll = MathF.Max(maxRoll, MathF.Abs(RollDegrees()));
+        }
+
+        // Sin "desenrollar", el filtro pasaría de −175° a +175° por 0° y el modelo daría media vuelta en el camino.
+        Assert.True(maxRoll <= 10.5f, $"roll máximo {maxRoll:F1}°");
+        Assert.Equal(10f, RollDegrees(), 0); // termina inclinado 10° a la izquierda
+    }
+
+    [Fact]
     public void Puno_mas_palma_es_idle()
     {
         Feed(3, Fist(0.4f), Fist(0.6f));

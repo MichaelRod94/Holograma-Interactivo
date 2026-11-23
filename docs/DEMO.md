@@ -21,7 +21,7 @@ Checklist para ensayar la demo completa con tu propio `.env`, sin tocar código.
 5. [ ] Prueba los 4 gestos y mira el indicador del Control:
    - Puño y mover → el modelo se mueve ("Agarrando"); abrir la mano lo suelta ("Libre").
    - Dos palmas separándose o juntándose → zoom.
-   - Dos puños → rotación.
+   - ✌️ con una mano → rotación: moverla gira el modelo y girar la muñeca lo inclina. Dos puños también rotan.
    - Tecla R → vuelve al centro.
    - RTT en el Control < 100 ms.
 6. [ ] "Crear con IA" con `Provider=Fake`: 1–4 fotos → "Lista" en segundos → "Proyectar".
@@ -93,7 +93,8 @@ Los valores están en la sección `Gestures` de `src/Holograma3D.Api/appsettings
 |-------|----------|--------|-----|
 | `GainXY` | Cuánto se mueve el modelo por cada unidad que se mueve la mano | 2.5 | se mueve poco → súbelo; cruza la pantalla con un gesto corto → bájalo |
 | `GainZ` | Profundidad al acercar o alejar el puño | 1.5 | la profundidad no se nota o salta |
-| `RotGain` | Radianes por unidad de desplazamiento de los dos puños | 3.5 | gira demasiado o muy poco |
+| `RotGain` | Radianes por unidad de desplazamiento al rotar (✌️ o dos puños) | 3.5 | gira demasiado o muy poco |
+| `RotateGesture` | Seña de MediaPipe para rotar con una mano; girar la muñeca inclina el modelo 1:1 | `Victory` (✌️) | MediaPipe la confunde → prueba `Pointing_Up` (☝️), `Thumb_Up` (👍) o `ILoveYou` (🤟); vacía = solo dos puños |
 | `ZoomExponent` | Sensibilidad del zoom con dos palmas | 1.0 | el zoom es brusco (bájalo) o lento (súbelo) |
 | `StableFrames` | Frames seguidos que debe durar un gesto para activarse | 3 | se activa sin querer → súbelo a 4–5; reacciona tarde → bájalo a 2 |
 | `DeadZone` | Movimiento mínimo que cuenta al arrastrar | 0.005 | el modelo tiembla con la mano quieta → súbelo |

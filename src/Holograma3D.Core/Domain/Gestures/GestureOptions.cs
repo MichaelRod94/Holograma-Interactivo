@@ -15,6 +15,12 @@ public sealed class GestureOptions
     /// <summary>El usuario se ve en espejo: se invierte X para que mover la mano a la derecha mueva el modelo a la derecha.</summary>
     public bool MirrorX { get; init; } = true;
 
+    /// <summary>
+    /// Categoría de MediaPipe que rota con una sola mano: moverla gira el modelo y girar la muñeca lo inclina.
+    /// "Victory" (✌️) por defecto; también sirven "Pointing_Up", "Thumb_Up" o "ILoveYou". Vacía = solo con dos puños.
+    /// </summary>
+    public string RotateGesture { get; init; } = "Victory";
+
     public bool FilterEnabled { get; init; } = true;
     public float FilterMinCutoff { get; init; } = 1.0f;
     public float FilterBeta { get; init; } = 0.02f;

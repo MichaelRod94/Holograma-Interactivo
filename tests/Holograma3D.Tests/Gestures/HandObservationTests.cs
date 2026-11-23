@@ -7,7 +7,9 @@ public class HandObservationTests
     [Theory]
     [InlineData("Closed_Fist", 0.9f, HandPose.Fist)]
     [InlineData("Open_Palm", 0.9f, HandPose.Open)]
-    [InlineData("Victory", 0.9f, HandPose.Other)]
+    [InlineData("Victory", 0.9f, HandPose.RotateSign)]
+    [InlineData("Pointing_Up", 0.9f, HandPose.Other)]
+    [InlineData("Victory", 0.5f, HandPose.Other)]
     [InlineData("None", 0.9f, HandPose.Other)]
     [InlineData("Closed_Fist", 0.5f, HandPose.Other)]
     [InlineData("Open_Palm", float.NaN, HandPose.Other)]
@@ -16,6 +18,28 @@ public class HandObservationTests
         var hand = HandObservation.FromMediaPipe(gesture, score, Hands.Landmarks(0.5f, 0.5f), Hands.NoFilter);
 
         Assert.Equal(expected, hand.Pose);
+    }
+
+    [Theory]
+    [InlineData("Pointing_Up", "Pointing_Up", HandPose.RotateSign)]
+    [InlineData("Pointing_Up", "Victory", HandPose.Other)]
+    [InlineData("", "Victory", HandPose.Other)] // vacía: solo se rota con dos puños
+    public void La_sena_de_rotar_es_configurable(string rotateGesture, string gesture, HandPose expected)
+    {
+        var hand = HandObservation.FromMediaPipe(gesture, 0.9f, Hands.Landmarks(0.5f, 0.5f), new GestureOptions { RotateGesture = rotateGesture });
+
+        Assert.Equal(expected, hand.Pose);
+    }
+
+    [Theory]
+    [InlineData(0, -90)]   // mano derecha hacia arriba
+    [InlineData(30, -60)]  // girada 30° en sentido horario, como la ve el usuario
+    [InlineData(-45, -135)]
+    public void El_angulo_sigue_el_giro_de_la_muneca(float tiltDegrees, float expectedDegrees)
+    {
+        var hand = Hands.At("Victory", 0.5f, tiltDegrees: tiltDegrees);
+
+        Assert.Equal(expectedDegrees, hand.Angle * 180 / MathF.PI, 2);
     }
 
     [Fact]
